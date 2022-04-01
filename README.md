@@ -59,7 +59,7 @@ Logged in users can select an available reservation from the search results and 
 
 Logged in users can delete a reservation from their existing reservations
 <br/>When the user confirms, a delete request is sent to the Python-Flask backend and the existing reservation is deleted from the postgreSQL database
-<br/><img width="50%" height="50%" alt="Delete Reservation" src="https://user-images.githubusercontent.com/43583599/161327011-2603f1fe-7cb8-4c9c-a088-67cfaab9e21b.png">
+<br/><img width="50%" height="50%" alt="Delete Reservation" src="https://user-images.githubusercontent.com/43583599/161327585-ce150742-4d1a-4f03-b49b-17f7772928b1.png">
 
 
 ## Installation
