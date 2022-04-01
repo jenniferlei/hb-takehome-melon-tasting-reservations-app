@@ -1,8 +1,15 @@
 """Models for melon tasing reservation scheduler app."""
 
+import os
+import re
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
+
+uri = os.getenv("DATABASE_URL")  # or other relevant config var
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+# rest of connection code using the connection string `uri`
 
 db = SQLAlchemy()
 
@@ -39,7 +46,7 @@ class Reservation(db.Model):
         return f"<Reservation reservation_id={self.reservation_id} username={self.username} date={self.date} start_time={self.start_time} end_time={self.end_time}>"
 
 
-def connect_to_db(flask_app, db_uri="postgresql://nptdtfcmapsxxa:13eef40364ff15d4344db6a3bd57b2b1d3caa9150c227ce03fc04e5439b9e3c9@ec2-52-201-124-168.compute-1.amazonaws.com:5432/detgf63tbfjuv", echo=True):
+def connect_to_db(flask_app, db_uri=uri, echo=True):
     """connect to database"""
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     flask_app.config["SQLALCHEMY_ECHO"] = echo
