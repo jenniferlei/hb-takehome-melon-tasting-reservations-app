@@ -4,6 +4,8 @@ A simple service to help users make reservations to go to a fancy melon tasting!
 
 We offer 24/7/365 (including weekends and holidays) but only 1 user can book an appointment on a given day and time.
 
+<img width="75%" height="75%" alt="Homepage" src="https://user-images.githubusercontent.com/43583599/161311049-ba6b92be-bf91-473e-a77c-cde7daf0039d.png">
+
 **CONTENTS**
 
 - [Tech Stack](#tech-stack)
@@ -22,8 +24,43 @@ We offer 24/7/365 (including weekends and holidays) but only 1 user can book an 
 ### LOG IN
 
 Users can log in by username
+<br/>The login form sends a post request to the Python-Flask backend and saves the session username and login information
 
-### SEARCH OPEN RESERVATIONS | ADD A RESERVATION | VIEW ALL RESERVATIONS
+<img width="50%" height="50%" alt="Log In" src="https://user-images.githubusercontent.com/43583599/161312093-51c658a9-a7fc-4cf4-bf9b-9dd23b8193ab.png">
+
+### RESERVATIONS
+
+<img width="50%" height="50%" alt="Reservations" src="https://user-images.githubusercontent.com/43583599/161316789-855175d2-ff7d-4dbe-986f-9c77f617bbd0.png">
+
+#### VIEW ALL RESERVATIONS
+
+Logged in users can view a table of their own reservations on the right side of the page
+<br/>React's useEffect hook fetches the JSON response for the logged in user's reservations from the Python-Flask backend server
+
+#### SEARCH AVAILABLE RESERVATIONS
+
+Logged in users can search reservations by date and optional start/end times
+<br/>The search sends a get fetch request to the Python-Flask backend server and returns a JSON response to the React frontend
+<br/><img width="50%" height="50%" alt="Search Reservations" src="https://user-images.githubusercontent.com/43583599/161325781-d234b098-5bc0-42b0-a8dd-43503c703666.png">
+
+If the user searches for reservations on a date they already have a reservation or if there are no reservations available, the search will not return any search results
+
+| Existing Reservation on Search Date | No Available Reservations in Search Time Frame |
+| ----------------------------------- | ---------------------------------------------- |
+| <img src="https://user-images.githubusercontent.com/43583599/161316945-6b642709-9b4d-4d01-a7ff-f9635a3b131e.png"> | <img src="https://user-images.githubusercontent.com/43583599/161325463-3ee999ad-064e-45f4-9c29-0455694e5f5b.png"> |
+
+#### ADD A RESERVATION
+
+Logged in users can select an available reservation from the search results and make a reservation
+<br/>When the user confirms, a post request is sent to the Python-Flask backend and adds a new reservation into the postgreSQL database
+<br/><img width="50%" height="50%" alt="Add Reservation" src="https://user-images.githubusercontent.com/43583599/161326381-b93bf406-feeb-4efe-9dfd-f0269c4576f8.png">
+
+#### DELETE A RESERVATION
+
+Logged in users can delete a reservation from their existing reservations
+<br/>When the user confirms, a delete request is sent to the Python-Flask backend and the existing reservation is deleted from the postgreSQL database
+<br/><img width="50%" height="50%" alt="Delete Reservation" src="https://user-images.githubusercontent.com/43583599/161327011-2603f1fe-7cb8-4c9c-a088-67cfaab9e21b.png">
+
 
 ## Installation
 
