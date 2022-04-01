@@ -30,12 +30,12 @@ Users can log in by username
 
 ### RESERVATIONS
 
-<img width="50%" height="50%" alt="Reservations" src="https://user-images.githubusercontent.com/43583599/161316789-855175d2-ff7d-4dbe-986f-9c77f617bbd0.png">
-
 #### VIEW ALL RESERVATIONS
 
 Logged in users can view a table of their own reservations on the right side of the page
 <br/>React's useEffect hook fetches the JSON response for the logged in user's reservations from the Python-Flask backend server
+<br/>React is used for a responsive app that does not require refreshing when a reservation is added or deleted
+<br/><img width="50%" height="50%" alt="Reservations" src="https://user-images.githubusercontent.com/43583599/161316789-855175d2-ff7d-4dbe-986f-9c77f617bbd0.png">
 
 #### SEARCH AVAILABLE RESERVATIONS
 
@@ -43,7 +43,7 @@ Logged in users can search reservations by date and optional start/end times
 <br/>The search sends a get fetch request to the Python-Flask backend server and returns a JSON response to the React frontend
 <br/><img width="50%" height="50%" alt="Search Reservations" src="https://user-images.githubusercontent.com/43583599/161325781-d234b098-5bc0-42b0-a8dd-43503c703666.png">
 
-If the user searches for reservations on a date they already have a reservation or if there are no reservations available, the search will not return any search results
+If the user searches for reservations on a date which they already have an existing reservation for or if there are no reservations available, the search will not return any results
 
 | Existing Reservation on Search Date | No Available Reservations in Search Time Frame |
 | ----------------------------------- | ---------------------------------------------- |
@@ -53,6 +53,8 @@ If the user searches for reservations on a date they already have a reservation 
 
 Logged in users can select an available reservation from the search results and make a reservation
 <br/>When the user confirms, a post request is sent to the Python-Flask backend and adds a new reservation into the postgreSQL database
+<br/>If the user tries to add another reservation from the same date, the user will be alerted and the reservation will not be created
+<br/>The postgres database also has a unique constraint to prevent multiple reservations on the same date with the same user from being created
 <br/><img width="50%" height="50%" alt="Add Reservation" src="https://user-images.githubusercontent.com/43583599/161326381-b93bf406-feeb-4efe-9dfd-f0269c4576f8.png">
 
 #### DELETE A RESERVATION
