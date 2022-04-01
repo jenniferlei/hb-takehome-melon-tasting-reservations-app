@@ -18,6 +18,7 @@ ma = Marshmallow(app)
 
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
