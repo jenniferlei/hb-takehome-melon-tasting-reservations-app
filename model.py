@@ -53,11 +53,20 @@ def connect_to_db(flask_app, db_uri="postgresql:///scheduler", echo=True):
 
 def example_data():
     """Create example data for the test database."""
+    import crud
+    from seed_database import appointment_times
     
-    test_user = User(username="testuser")
-    test_reservation = Reservation(user=test_user, date="2022-03-31", start_time="12:00", end_time="12:30")
+    for i in range(50):
+        username = f'testuser{i}'
+        test_user = crud.create_user(username)
+        db.session.add(test_user)
+
+    for idx, time_slot in enumerate(appointment_times):
+        username = f'testuser{idx}'
+        user = crud.get_user_by_username(username)
+        test_reservation = crud.create_reservation(user, "2022-03-31", time_slot[0], time_slot[1])
+        db.session.add(test_reservation)
     
-    db.session.add_all([test_user, test_reservation])
     db.session.commit()
 
 

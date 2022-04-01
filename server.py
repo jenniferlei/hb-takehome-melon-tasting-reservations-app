@@ -72,33 +72,6 @@ def process_logout():
     return redirect(request.referrer)
 
 
-@app.route("/reservations")
-def all_reservations():
-    """View all reservations for a given user."""
-
-    username = session.get("username")
-    reservations = crud.get_reservations_by_user(username)
-    reservations_schema = ReservationSchema(many=True)
-    reservations_json = reservations_schema.dump(reservations)
-
-    return jsonify({"reservations": reservations_json})
-
-
-@app.route("/search_reservations", methods=["GET"])
-def search_reservations():
-    """Search for reservations"""
-
-    date = request.args.get("date", "")
-    start_time = request.args.get("start_time", "")
-    end_time = request.args.get("end_time", "")
-
-    reservations = crud.get_reservations_by_query(date, start_time, end_time)
-    reservations_schema = ReservationSchema(many=True)
-    reservations_json = reservations_schema.dump(reservations)
-
-    return jsonify({"reservations": reservations_json})
-
-
 @app.route("/login_session.json")
 def login_session_json():
     """Return a JSON response for a login."""
@@ -113,6 +86,33 @@ def login_session_json():
     return jsonify({"login": login, "username": username})
 
 
+@app.route("/reservations.json")
+def all_reservations():
+    """Return a JSON response for all reservations for logged in user."""
+
+    username = session.get("username")
+    reservations = crud.get_reservations_by_user(username)
+    reservations_schema = ReservationSchema(many=True)
+    reservations_json = reservations_schema.dump(reservations)
+
+    return jsonify({"reservations": reservations_json})
+
+
+@app.route("/search_reservations", methods=["GET"])
+def search_reservations():
+    """Return a JSON response for reservations given date and time queries"""
+
+    date = request.args.get("date", "")
+    start_time = request.args.get("start_time", "")
+    end_time = request.args.get("end_time", "")
+
+    reservations = crud.get_reservations_by_query(date, start_time, end_time)
+    reservations_schema = ReservationSchema(many=True)
+    reservations_json = reservations_schema.dump(reservations)
+
+    return jsonify({"reservations": reservations_json})
+
+
 @app.route("/add-reservation", methods=["POST"])
 def add_reservation():
     """Create a reservation"""
@@ -124,19 +124,11 @@ def add_reservation():
     start_time = request.get_json().get("startTime")
     end_time = request.get_json().get("endTime")
 
-    reservation = crud.create_reservation(
-        user,
-        date,
-        start_time,
-        end_time
-    )
+    reservation = crud.create_reservation(user, date, start_time, end_time)
     db.session.add(reservation)
     db.session.commit()
-    
-    reservation_schema = ReservationSchema()
-    reservation_json = reservation_schema.dump(reservation)
 
-    return jsonify({"success": True, "reservationAdded": reservation_json})
+    return jsonify({"success": True})
 
 
 @app.route("/delete-reservation/<reservation_id>", methods=["DELETE"])
@@ -149,7 +141,6 @@ def delete_reservation(reservation_id):
     db.session.commit()
 
     return jsonify({"success": True})
-
 
 
 if __name__ == "__main__":

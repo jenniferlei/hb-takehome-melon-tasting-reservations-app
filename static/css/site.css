@@ -96,3 +96,8 @@ h5,
 h6 {
   font-family: "Manrope", Helvetica, Arial, Arial, Tahoma, sans-serif;
 }
+
+.table-overflow {
+  height: 100%;
+  overflow-y: auto;
+}

@@ -1,5 +1,6 @@
 "use strict";
 
+// possible appointment start and end times
 const appointmentTimes = [
   ["00:00", "00:30", 1],
   ["00:30", "01:00", 2],
@@ -52,6 +53,8 @@ const appointmentTimes = [
 ];
 
 const ViewReservation = (props) => {
+  // table rows for viewing user's existing reservations
+
   const { reservationId, date, startTime, endTime } = props;
   const convertTimeFormat = (time) => {
     const timeHours = time.slice(0, 2);
@@ -107,7 +110,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
   }, []);
 
   const getReservations = () => {
-    fetch("/reservations")
+    fetch("/reservations.json")
       .then((response) => response.json())
       .then((responseJson) => {
         const { reservations } = responseJson;
@@ -117,7 +120,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
 
   React.useImperativeHandle(ref, () => ({
     getReservations() {
-      fetch("/reservations")
+      fetch("/reservations.json")
         .then((response) => response.json())
         .then((responseJson) => {
           const { reservations } = responseJson;
@@ -140,7 +143,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
   ));
 
   return (
-    <div>
+    <div className="table-overflow">
       <h3>Your Reservations</h3>
       <table className="table table-striped table-sm">
         <thead>
@@ -177,22 +180,33 @@ const OpenReservation = (props) => {
     date.slice(5, 7) + "/" + date.slice(8, 10) + "/" + date.slice(2, 4);
 
   const addReservation = () => {
-    fetch("/add-reservation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        date,
-        startTime,
-        endTime,
-      }),
-    }).then((response) => {
-      response.json().then((jsonResponse) => {
-        props.parentGetReservations(); // lift state up to SearchReservation
+    fetch("/reservations.json")
+      .then((response) => response.json())
+      .then((responseJson) => {
+        const { reservations } = responseJson;
+        if (reservations.some((reservation) => reservation.date === date)) {
+          alert(
+            "You already have a reservation for this date. Please search for a different date."
+          );
+        } else {
+          fetch("/add-reservation", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              date,
+              startTime,
+              endTime,
+            }),
+          }).then((response) => {
+            response.json().then((jsonResponse) => {
+              props.parentGetReservations(); // lift state up to SearchReservation
+            });
+          });
+        }
       });
-    });
   };
 
   return (
@@ -471,9 +485,9 @@ const SearchReservation = (props) => {
         }}
       >
         <div
+          className="table-overflow"
           style={{
-            height: "100%",
-            overflowY: "auto",
+            paddingTop: "5px",
           }}
         >
           {errorMessage ? (
@@ -524,7 +538,9 @@ const ReservationContainer = (props) => {
             />
           </div>
           <div className="col-md-5 offset-md-1">
-            <ViewReservationContainer ref={ViewReservationContainerRef} />
+            <div style={{ height: "calc(100vh - 180px" }}>
+              <ViewReservationContainer ref={ViewReservationContainerRef} />
+            </div>
           </div>
         </div>
       </div>
