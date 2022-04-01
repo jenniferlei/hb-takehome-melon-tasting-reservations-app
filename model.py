@@ -39,7 +39,8 @@ class Reservation(db.Model):
         return f"<Reservation reservation_id={self.reservation_id} username={self.username} date={self.date} start_time={self.start_time} end_time={self.end_time}>"
 
 
-def connect_to_db(flask_app, db_uri="postgresql:///scheduler", echo=True):
+def connect_to_db(flask_app, db_uri="postgres://evseexcyzaukhk:920fdfe2d7b0cb909504ad61587075e1fed59b38b12a5a949cd17d02755bad73@ec2-3-217-251-77.compute-1.amazonaws.com:5432/dcvr918o9v4v2d
+", echo=True):
     """connect to database"""
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     flask_app.config["SQLALCHEMY_ECHO"] = echo

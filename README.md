@@ -23,8 +23,8 @@ We offer 24/7/365 (including weekends and holidays) but only 1 user can book an 
 
 ### LOG IN
 
-Users can log in by username
-<br/>The login form sends a post request to the Python-Flask backend and saves the session username and login information
+Users can log in by username.
+<br/>The login form sends a post request to the Python-Flask backend and saves the session username and login information.
 
 <img width="50%" height="50%" alt="Log In" src="https://user-images.githubusercontent.com/43583599/161312093-51c658a9-a7fc-4cf4-bf9b-9dd23b8193ab.png">
 
@@ -32,37 +32,40 @@ Users can log in by username
 
 #### VIEW ALL RESERVATIONS
 
-Logged in users can view a table of their own reservations on the right side of the page
-<br/>React's useEffect hook fetches the JSON response for the logged in user's reservations from the Python-Flask backend server
-<br/>React is used for a responsive app that does not require refreshing when a reservation is added or deleted
+Logged in users can view a table of their own reservations on the right side of the page.
+<br/>React's useEffect hook fetches the JSON response for the logged in user's reservations from the Python-Flask backend server.
+<br/>React is used for a responsive app that does not require refreshing when a reservation is added or deleted.
 <br/><img width="50%" height="50%" alt="Reservations" src="https://user-images.githubusercontent.com/43583599/161316789-855175d2-ff7d-4dbe-986f-9c77f617bbd0.png">
 
 #### SEARCH AVAILABLE RESERVATIONS
 
-Logged in users can search reservations by date and optional start/end times
-<br/>The search sends a get fetch request to the Python-Flask backend server and returns a JSON response to the React frontend
+Logged in users can search reservations by date and optional start/end times.
+<br/>The search sends a get fetch request to the Python-Flask backend server and returns a JSON response to the React frontend.
 <br/><img width="50%" height="50%" alt="Search Reservations" src="https://user-images.githubusercontent.com/43583599/161325781-d234b098-5bc0-42b0-a8dd-43503c703666.png">
 
-If the user searches for reservations on a date which they already have an existing reservation for or if there are no reservations available, the search will not return any results
+If the user searches for reservations on a date which they already have an existing reservation for or if there are no reservations available, the search will not return any results.
 
-| Existing Reservation on Search Date | No Available Reservations in Search Time Frame |
-| ----------------------------------- | ---------------------------------------------- |
+| Existing Reservation on Search Date                                                                               | No Available Reservations in Search Time Frame                                                                    |
+| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | <img src="https://user-images.githubusercontent.com/43583599/161316945-6b642709-9b4d-4d01-a7ff-f9635a3b131e.png"> | <img src="https://user-images.githubusercontent.com/43583599/161325463-3ee999ad-064e-45f4-9c29-0455694e5f5b.png"> |
 
 #### ADD A RESERVATION
 
-Logged in users can select an available reservation from the search results and make a reservation
-<br/>When the user confirms, a post request is sent to the Python-Flask backend and adds a new reservation into the postgreSQL database
-<br/>If the user tries to add another reservation from the same date, the user will be alerted and the reservation will not be created
-<br/>The postgres database also has a unique constraint to prevent multiple reservations on the same date with the same user from being created
+Logged in users can select an available reservation from the search results and make a reservation.
+<br/>When the user confirms, a post request is sent to the Python-Flask backend and adds a new reservation into the postgreSQL database.
+<br/>Once a new reservation is created in the current component, the React frontend fetches the user's reservations in its sibling (view reservations container) component.
+<br/>This is done by lifting state up to the parent (reservation container) and then using useRef in the parent to access the child component where the reservations are.
+<br/>This enables the user to see their reservations with the added reservation without refreshing.
+<br/>If the user tries to add another reservation from the same date, the user will be alerted and the reservation will not be created.
+<br/>The postgres database also has a unique constraint to prevent multiple reservations on the same date with the same user from being created.
 <br/><img width="50%" height="50%" alt="Add Reservation" src="https://user-images.githubusercontent.com/43583599/161326381-b93bf406-feeb-4efe-9dfd-f0269c4576f8.png">
 
 #### DELETE A RESERVATION
 
 Logged in users can delete a reservation from their existing reservations
 <br/>When the user confirms, a delete request is sent to the Python-Flask backend and the existing reservation is deleted from the postgreSQL database
+<br/>The user's reservations are refreshed to show reservations excluding the deleted reservation by lifting state up to the parent (view reservations container) component.
 <br/><img width="50%" height="50%" alt="Delete Reservation" src="https://user-images.githubusercontent.com/43583599/161327585-ce150742-4d1a-4f03-b49b-17f7772928b1.png">
-
 
 ## Installation
 

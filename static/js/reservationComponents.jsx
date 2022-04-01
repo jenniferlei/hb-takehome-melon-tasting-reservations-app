@@ -53,9 +53,12 @@ const appointmentTimes = [
 ];
 
 const ViewReservation = (props) => {
-  // table rows for viewing user's existing reservations
+  // Table rows for viewing user's existing reservations and modals to delete existing reservations
 
+  // unpack props
   const { reservationId, date, startTime, endTime } = props;
+
+  // Convert 24 hour time to 12 hour time format
   const convertTimeFormat = (time) => {
     const timeHours = time.slice(0, 2);
     const timeHoursConverted = String(((Number(timeHours) + 11) % 12) + 1);
@@ -66,9 +69,11 @@ const ViewReservation = (props) => {
     return updatedTimeString;
   };
 
+  // Convert date to yyyy-mm-dd to mm/dd/yy format
   const dateFormatted =
     date.slice(5, 7) + "/" + date.slice(8, 10) + "/" + date.slice(2, 4);
 
+  // Confirm user would like to delete reservation. Delete reservation once validated
   const deleteReservation = () => {
     const validate = confirm("Do you want to delete this reservation?");
     if (validate) {
@@ -76,8 +81,7 @@ const ViewReservation = (props) => {
         method: "DELETE",
       }).then((response) => {
         response.json().then((jsonResponse) => {
-          // console.log(jsonResponse);
-          props.getReservations();
+          props.getReservations(); // lift state up to ViewReservationContainer (show reservations without deleted reservation)
         });
       });
     }
@@ -103,12 +107,15 @@ const ViewReservation = (props) => {
 };
 
 const ViewReservationContainer = React.forwardRef((props, ref) => {
+  // Container of all table rows for viewing user's existing reservations
+
   const [reservations, setReservations] = React.useState([]);
 
   React.useEffect(() => {
     getReservations();
   }, []);
 
+  // get logged in user's existing reservations
   const getReservations = () => {
     fetch("/reservations.json")
       .then((response) => response.json())
@@ -118,6 +125,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
       });
   };
 
+  // Access getReservations function from parent ReservationContainer
   React.useImperativeHandle(ref, () => ({
     getReservations() {
       fetch("/reservations.json")
@@ -131,6 +139,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
 
   const timestamp = Date.now();
 
+  // Create ViewReservation components for each of user's reservations
   const allReservations = reservations.map((reservation) => (
     <ViewReservation
       key={`${timestamp}-${reservation.reservation_id}`}
@@ -161,9 +170,12 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
 });
 
 const OpenReservation = (props) => {
-  const { reserveId, date, startTime, endTime } = props;
-  console.log(startTime, endTime);
+  // Table rows for reservations search results and modals to add new reservations
 
+  // unpack props
+  const { reserveId, date, startTime, endTime } = props;
+
+  // Convert 24 hour time to 12 hour time format
   const convertTimeFormat = (time) => {
     const timeHours = time.slice(0, 2);
     const timeHoursConverted = String(((Number(timeHours) + 11) % 12) + 1);
@@ -176,9 +188,12 @@ const OpenReservation = (props) => {
 
   const startTimeFormatted = convertTimeFormat(startTime);
   const endTimeFormatted = convertTimeFormat(endTime);
+
+  // Convert date to yyyy-mm-dd to mm/dd/yy format
   const dateFormatted =
     date.slice(5, 7) + "/" + date.slice(8, 10) + "/" + date.slice(2, 4);
 
+  // Check if user already has a reservation for the date. If not, create reservation
   const addReservation = () => {
     fetch("/reservations.json")
       .then((response) => response.json())
@@ -292,7 +307,7 @@ const SearchReservation = (props) => {
   const [errorMessage, setErrorMessage] = React.useState(null);
 
   React.useEffect(() => {
-    // fetch all
+    // get username of logged in user
     fetch("/login_session.json")
       .then((response) => response.json())
       .then((responseJson) => {
@@ -301,6 +316,7 @@ const SearchReservation = (props) => {
       });
   }, []);
 
+  // Check if an existing reservation exists for each time slot. If not, add time slot to available reservations
   const compareWithExistingReservations = (apptTimes, reservations) => {
     let availReservations = [];
     apptTimes.map((timeSlot) => {
@@ -391,12 +407,12 @@ const SearchReservation = (props) => {
             } else {
               compareWithExistingReservations(appointmentTimes, reservations);
             }
-            // If start time is not already reserved, add to available reservation times
           }
         });
     }
   };
 
+  // Clear search parameters and results
   const clearSearch = () => {
     setReservationDate("");
     setReservationStart("");
@@ -406,11 +422,11 @@ const SearchReservation = (props) => {
 
   const parentGetReservations = () => {
     props.topParentGetReservations(); // lift state up to ReservationContainer
-    // clearSearch();
   };
 
   const timestamp = Date.now();
 
+  // For each open reservation, create OpenReservation component
   const allOpenReservations = openReservations
     .sort((a, b) => {
       return a.order - b.order;
@@ -518,6 +534,9 @@ const SearchReservation = (props) => {
 };
 
 const ReservationContainer = (props) => {
+  // Container for SearchReservation and ViewReservationContainer
+
+  // React hook useRef to access child ViewReservationContainer's getReservation function
   const ViewReservationContainerRef = React.useRef();
   const topParentGetReservations = () => {
     ViewReservationContainerRef.current.getReservations();
