@@ -1,77 +1,81 @@
 "use strict";
 
 const appointmentTimes = [
-  ["00:00", "00:30"],
-  ["00:30", "01:00"],
-  ["01:00", "01:30"],
-  ["01:30", "02:00"],
-  ["02:00", "02:30"],
-  ["02:30", "03:00"],
-  ["03:00", "03:30"],
-  ["03:30", "04:00"],
-  ["04:00", "04:30"],
-  ["04:30", "05:00"],
-  ["05:00", "05:30"],
-  ["05:30", "06:00"],
-  ["06:00", "06:30"],
-  ["06:30", "07:00"],
-  ["07:00", "07:30"],
-  ["07:30", "08:00"],
-  ["08:00", "08:30"],
-  ["08:30", "09:00"],
-  ["09:00", "09:30"],
-  ["09:30", "10:00"],
-  ["10:00", "10:30"],
-  ["10:30", "11:00"],
-  ["11:00", "11:30"],
-  ["11:30", "12:00"],
-  ["12:00", "12:30"],
-  ["12:30", "13:00"],
-  ["13:00", "13:30"],
-  ["13:30", "14:00"],
-  ["14:00", "14:30"],
-  ["14:30", "15:00"],
-  ["15:00", "15:30"],
-  ["15:30", "16:00"],
-  ["16:00", "16:30"],
-  ["16:30", "17:00"],
-  ["17:00", "17:30"],
-  ["17:30", "18:00"],
-  ["18:00", "18:30"],
-  ["18:30", "19:00"],
-  ["19:00", "19:30"],
-  ["19:30", "20:00"],
-  ["20:00", "20:30"],
-  ["20:30", "21:00"],
-  ["21:00", "21:30"],
-  ["21:30", "22:00"],
-  ["22:00", "22:30"],
-  ["22:30", "23:00"],
-  ["23:00", "23:30"],
-  ["23:30", "00:00"],
+  ["00:00", "00:30", 1],
+  ["00:30", "01:00", 2],
+  ["01:00", "01:30", 3],
+  ["01:30", "02:00", 4],
+  ["02:00", "02:30", 5],
+  ["02:30", "03:00", 6],
+  ["03:00", "03:30", 7],
+  ["03:30", "04:00", 8],
+  ["04:00", "04:30", 9],
+  ["04:30", "05:00", 10],
+  ["05:00", "05:30", 11],
+  ["05:30", "06:00", 12],
+  ["06:00", "06:30", 13],
+  ["06:30", "07:00", 14],
+  ["07:00", "07:30", 15],
+  ["07:30", "08:00", 16],
+  ["08:00", "08:30", 17],
+  ["08:30", "09:00", 18],
+  ["09:00", "09:30", 19],
+  ["09:30", "10:00", 20],
+  ["10:00", "10:30", 21],
+  ["10:30", "11:00", 22],
+  ["11:00", "11:30", 23],
+  ["11:30", "12:00", 24],
+  ["12:00", "12:30", 25],
+  ["12:30", "13:00", 26],
+  ["13:00", "13:30", 27],
+  ["13:30", "14:00", 28],
+  ["14:00", "14:30", 29],
+  ["14:30", "15:00", 30],
+  ["15:00", "15:30", 31],
+  ["15:30", "16:00", 32],
+  ["16:00", "16:30", 33],
+  ["16:30", "17:00", 34],
+  ["17:00", "17:30", 35],
+  ["17:30", "18:00", 36],
+  ["18:00", "18:30", 37],
+  ["18:30", "19:00", 38],
+  ["19:00", "19:30", 39],
+  ["19:30", "20:00", 40],
+  ["20:00", "20:30", 41],
+  ["20:30", "21:00", 42],
+  ["21:00", "21:30", 43],
+  ["21:30", "22:00", 44],
+  ["22:00", "22:30", 45],
+  ["22:30", "23:00", 46],
+  ["23:00", "23:30", 47],
+  ["23:30", "00:00", 48],
 ];
 
 const ViewReservation = (props) => {
+  const { reservationId, date, startTime, endTime } = props;
   const convertTimeFormat = (time) => {
     const timeHours = time.slice(0, 2);
     const timeHoursConverted = String(((Number(timeHours) + 11) % 12) + 1);
     const timeMins = time.slice(3, 5);
-    const timeSuffix = timeHours <= 12 ? "PM" : "AM";
+    const timeSuffix = timeHours < 12 ? "AM" : "PM";
     const updatedTimeString =
       timeHoursConverted + ":" + timeMins + " " + timeSuffix;
     return updatedTimeString;
   };
 
+  const dateFormatted =
+    date.slice(5, 7) + "/" + date.slice(8, 10) + "/" + date.slice(2, 4);
+
   return (
-    <tr id={props.reservationId}>
-      <td>{props.date}</td>
-      <td>{convertTimeFormat(props.startTime)}</td>
-      <td>{convertTimeFormat(props.endTime)}</td>
+    <tr id={reservationId}>
+      <td>{dateFormatted}</td>
+      <td>{convertTimeFormat(startTime)}</td>
+      <td>{convertTimeFormat(endTime)}</td>
     </tr>
   );
 };
 
-const ViewReservationContainer = (props) => {
+const ViewReservationContainer = React.forwardRef((props, ref) => {
   const [reservations, setReservations] = React.useState([]);
 
   React.useEffect(() => {
@@ -82,6 +86,17 @@ const ViewReservationContainer = (props) => {
         setReservations(reservations);
       });
   }, []);
+
+  React.useImperativeHandle(ref, () => ({
+    getReservations() {
+      fetch("/reservations")
+        .then((response) => response.json())
+        .then((responseJson) => {
+          const { reservations } = responseJson;
+          setReservations(reservations);
+        });
+    },
+  }));
 
   const timestamp = Date.now();
 
@@ -110,25 +125,113 @@ const ViewReservationContainer = (props) => {
       </table>
     </div>
   );
-};
+});
 
 const OpenReservation = (props) => {
+  const { reserveId, date, startTime, endTime } = props;
+  console.log(startTime, endTime);
+
   const convertTimeFormat = (time) => {
     const timeHours = time.slice(0, 2);
     const timeHoursConverted = String(((Number(timeHours) + 11) % 12) + 1);
     const timeMins = time.slice(3, 5);
-    const timeSuffix = timeHours <= 12 ? "PM" : "AM";
+    const timeSuffix = timeHours < 12 ? "AM" : "PM";
     const updatedTimeString =
       timeHoursConverted + ":" + timeMins + " " + timeSuffix;
     return updatedTimeString;
   };
+
+  const startTimeFormatted = convertTimeFormat(startTime);
+  const endTimeFormatted = convertTimeFormat(endTime);
+  const dateFormatted =
+    date.slice(5, 7) + "/" + date.slice(8, 10) + "/" + date.slice(2, 4);
+
+  const addReservation = () => {
+    fetch("/add-reservation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        date,
+        startTime,
+        endTime,
+      }),
+    }).then((response) => {
+      response.json().then((jsonResponse) => {
+        props.parentGetReservations(); // lift state up to SearchReservation
+      });
+    });
+  };
+
   return (
-    <tr>
-      <td>{props.date}</td>
-      <td>{convertTimeFormat(props.startTime)}</td>
-      <td>{convertTimeFormat(props.endTime)}</td>
-      <td>Add</td>
-    </tr>
+    <React.Fragment>
+      <tr>
+        <td>{dateFormatted}</td>
+        <td>{startTimeFormatted}</td>
+        <td>{endTimeFormatted}</td>
+        <td>
+          <button
+            type="button"
+            className="btn btn-outline-dark"
+            style={{ borderRadius: "50%", padding: "0 7.5px" }}
+            data-bs-toggle="modal"
+            data-bs-target={`#add-reservation-${reserveId}`}
+          >
+            +
+          </button>
+        </td>
+      </tr>
+
+      <div
+        className="modal fade"
+        id={`add-reservation-${reserveId}`}
+        tabIndex="-1"
+        aria-labelledby={`add-reservation-${reserveId}-label`}
+        aria-hidden="true"
+      >
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5
+                className="modal-title"
+                id={`add-reservation-${reserveId}-label`}
+              >
+                Add Reservation
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body fw-300">
+              Would you like to create a reservation for {dateFormatted} from{" "}
+              {startTimeFormatted} to {endTimeFormatted}?
+              <div className="modal-footer">
+                <button
+                  className="btn btn-sm btn-outline-dark btn-block fw-300"
+                  type="submit"
+                  data-bs-dismiss="modal"
+                  onClick={addReservation}
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary btn-block fw-300"
+                  data-bs-dismiss="modal"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>
   );
 };
 
@@ -198,6 +301,7 @@ const SearchReservation = (props) => {
                 availReservations.push({
                   startTime: timeSlot[0],
                   endTime: timeSlot[1],
+                  order: timeSlot[2],
                 });
               }
             });
@@ -214,67 +318,90 @@ const SearchReservation = (props) => {
     }
   };
 
+  const parentGetReservations = () => {
+    props.topParentGetReservations(); // lift state up to ReservationContainer
+  };
+
   const timestamp = Date.now();
 
-  const allOpenReservations = openReservations.map((reservation) => (
-    <OpenReservation
-      key={`${timestamp}-${reservationDate}-${reservation.startTime}`}
-      date={reservationDate}
-      startTime={reservation.startTime}
-      endTime={reservation.endTime}
-    />
-  ));
+  const allOpenReservations = openReservations
+    .sort((a, b) => {
+      return a.order - b.order;
+    })
+    .map((reservation) => (
+      <OpenReservation
+        key={`${timestamp}-${reservation.order}`}
+        reserveId={`${timestamp}-${reservation.order}`}
+        date={reservationDate}
+        startTime={reservation.startTime}
+        endTime={reservation.endTime}
+        parentGetReservations={parentGetReservations}
+      />
+    ));
 
   return (
-    <div>
-      <h3>Make A Reservation</h3>
-      Enter the Date of the reservation you would like
-      <div className="mb-1">
-        <label htmlFor="reservationDate"> Date </label>
-        <input
-          type="date"
-          value={reservationDate}
-          onChange={(event) => setReservationDate(event.target.value)}
-          className="form-control"
-          id="reservationDate"
-        />
-      </div>
-      Enter an optional time range and we will only show appointments in that
-      range
-      <div className="row">
-        <div className="col mb-1">
-          <label htmlFor="reservationStart"> Start Time </label>
+    <React.Fragment>
+      <div>
+        <h3>Make A Reservation</h3>
+        Enter the Date of the reservation you would like
+        <div className="mb-1">
+          <label htmlFor="reservationDate"> Date </label>
           <input
-            type="time"
-            value={reservationStart}
-            onChange={(event) => setReservationStart(event.target.value)}
+            type="date"
+            value={reservationDate}
+            onChange={(event) => setReservationDate(event.target.value)}
             className="form-control"
-            id="reservationStart"
+            id="reservationDate"
           />
         </div>
-        <div className="col mb-1">
-          <label htmlFor="reservationEnd"> End Time </label>
-          <input
-            type="time"
-            value={reservationEnd}
-            onChange={(event) => setReservationEnd(event.target.value)}
-            className="form-control"
-            id="reservationEnd"
-          />
+        Enter an optional time range and we will only show appointments in that
+        range
+        <div className="row">
+          <div className="col mb-1">
+            <label htmlFor="reservationStart"> Start Time </label>
+            <input
+              type="time"
+              value={reservationStart}
+              onChange={(event) => setReservationStart(event.target.value)}
+              className="form-control"
+              id="reservationStart"
+            />
+          </div>
+
+          <div className="col mb-1">
+            <label htmlFor="reservationEnd"> End Time </label>
+            <input
+              type="time"
+              value={reservationEnd}
+              onChange={(event) => setReservationEnd(event.target.value)}
+              className="form-control"
+              id="reservationEnd"
+            />
+          </div>
         </div>
+        <button
+          type="submit"
+          className="btn btn-outline-dark"
+          onClick={getOpenReservations}
+        >
+          Search
+        </button>
       </div>
-      <button
-        type="submit"
-        className="btn btn-outline-dark"
-        onClick={getOpenReservations}
+      <div
+        className="flex-container"
+        style={{
+          height: "calc(100% - 290px)",
+          maxHeight: "calc(100% - 290px)",
+          minHeight: "0",
+          overflowY: "auto",
+          display: "table",
+        }}
       >
-        Search
-      </button>
-      <div style={{ height: "100%", overflowY: "auto" }}>
+        test
         {errorMessage ? (
           <div>{errorMessage}</div>
         ) : openReservations.length > 0 ? (
-          <React.Fragment>
+          <div>
             <table className="table table-striped table-sm">
               <thead>
                 <tr>
@@ -286,14 +413,19 @@ const SearchReservation = (props) => {
               </thead>
               <tbody>{allOpenReservations}</tbody>
             </table>
-          </React.Fragment>
+          </div>
         ) : null}
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 
 const ReservationContainer = (props) => {
+  const ViewReservationContainerRef = React.useRef();
+  const topParentGetReservations = () => {
+    ViewReservationContainerRef.current.getReservations();
+  };
+
   return (
     <div
       className="card"
@@ -305,12 +437,16 @@ const ReservationContainer = (props) => {
         backgroundColor: "rgba(255, 255, 255, 0.9)",
       }}
     >
-      <div className="card-body d-flex">
-        <div className="col-md-6">
-          <SearchReservation />
-        </div>
-        <div className="col-md-5 offset-md-1">
-          <ViewReservationContainer />
+      <div className="card-body">
+        <div className="d-flex" style={{ height: "100%", width: "100%" }}>
+          <div className="col-md-6" style={{ height: "100%" }}>
+            <SearchReservation
+              topParentGetReservations={topParentGetReservations}
+            />
+          </div>
+          <div className="col-md-5 offset-md-1">
+            <ViewReservationContainer ref={ViewReservationContainerRef} />
+          </div>
         </div>
       </div>
     </div>

@@ -72,7 +72,6 @@ def process_logout():
     return redirect(request.referrer)
 
 
-
 @app.route("/reservations")
 def all_reservations():
     """View all reservations for a given user."""
@@ -115,110 +114,33 @@ def login_session_json():
 
 
 
-@app.route("/add-pet", methods=["POST"])
-def add_pet():
-    """Create a pet profile"""
+@app.route("/add-reservation", methods=["POST"])
+def add_reservation():
+    """Create a reservation"""
 
-    logged_in_email = session.get("user_email")
-    user = crud_users.get_user_by_email(logged_in_email)
+    username = session.get("username")
+    user = crud.get_user_by_username(username)
 
-    form_data = request.form.to_dict("formData")
-    pet_name = form_data["petName"]
-    gender = form_data["gender"]
-    birthday = form_data["birthday"]
-    breed = form_data["breed"]
-    my_file = request.files.get("imageFile")
+    date = request.get_json().get("date")
+    start_time = request.get_json().get("startTime")
+    end_time = request.get_json().get("endTime")
 
-    if gender == "":
-        gender = None
-    if birthday == "":
-        birthday = None
-    if breed == "":
-        breed = None
-    if my_file is None:
-        pet_img_url = None
-        img_public_id = None
-    else:
-        # save the uploaded file to Cloudinary by making an API request
-        result = cloudinary.uploader.upload(
-            my_file,
-            api_key=CLOUDINARY_KEY,
-            api_secret=CLOUDINARY_SECRET,
-            cloud_name=CLOUD_NAME,
-        )
-        pet_img_url = result["secure_url"]
-        img_public_id = result["public_id"]
-
-    check_ins = []
-
-    pet = crud_pets.create_pet(
+    reservation = crud.create_reservation(
         user,
-        pet_name,
-        gender,
-        birthday,
-        breed,
-        pet_img_url,
-        img_public_id,
-        check_ins,
+        date,
+        start_time,
+        end_time
     )
-    db.session.add(pet)
+    db.session.add(reservation)
     db.session.commit()
     
+    reservation_schema = ReservationSchema()
+    reservation_json = reservation_schema.dump(reservation)
 
-    pet_schema = PetSchema()
-    pet_json = pet_schema.dump(pet)
-
-    return jsonify({"success": True, "petAdded": pet_json})
+    return jsonify({"success": True, "reservationAdded": reservation_json})
 
 
-@app.route("/edit-pet/<pet_id>", methods=["POST"])
-def edit_pet(pet_id):
-    """Edit a pet"""
 
-    pet = crud_pets.get_pet_by_id(pet_id)
-
-    form_data = request.form.to_dict("formData")
-
-    pet.pet_name = form_data["petName"]
-
-    gender = form_data["gender"]
-    birthday = form_data["birthday"]
-    breed = form_data["breed"]
-    my_file = request.files.get("imageFile")
-
-    print(my_file)
-
-    if gender != "":
-        pet.gender = gender
-    if birthday != "":
-        pet.birthday = birthday
-    if breed != "":
-        pet.breed = breed
-
-    if my_file is not None: # if user uploads new image file, delete old image from cloudinary
-    # then upload new image
-        img_public_id = pet.img_public_id
-        if img_public_id is not None:
-            cloudinary.uploader.destroy(
-                img_public_id,
-                api_key=CLOUDINARY_KEY,
-                api_secret=CLOUDINARY_SECRET,
-                cloud_name=CLOUD_NAME,
-        )
-        # save the uploaded file to Cloudinary by making an API request
-        result = cloudinary.uploader.upload(
-            my_file,
-            api_key=CLOUDINARY_KEY,
-            api_secret=CLOUDINARY_SECRET,
-            cloud_name=CLOUD_NAME,
-        )
-
-        pet.pet_imgURL = result["secure_url"]
-        pet.img_public_id = result["public_id"]
-
-    db.session.commit()
-
-    return jsonify({"success": True})
 
 
 @app.route("/delete-pet/<pet_id>", methods=["DELETE"])
