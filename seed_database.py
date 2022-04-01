@@ -9,9 +9,9 @@ import crud
 import model
 import server
 
-# Run dropdb and createdb to re-create database
-os.system("dropdb scheduler --if-exists")
-os.system("createdb scheduler")
+# # Run dropdb and createdb to re-create database
+# os.system("dropdb scheduler --if-exists")
+# os.system("createdb scheduler")
 
 # Connect to the database and call db.create_all
 model.connect_to_db(server.app)
