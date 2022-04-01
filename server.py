@@ -3,8 +3,6 @@
 from flask import Flask, render_template, json, jsonify, request, flash, session, redirect
 from flask_sqlalchemy import SQLAlchemy
 import os
-from datetime import datetime
-from calendar import month_abbr
 
 from model import (connect_to_db, db, User, Reservation)
 
@@ -20,6 +18,22 @@ ma = Marshmallow(app)
 
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
+
+
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        load_instance = True
+
+    reservations = fields.List(fields.Nested("ReservationSchema", exclude=("user",)))
+
+
+class ReservationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Reservation
+        include_fk = True
+        load_instance = True
+
 
 @app.route("/")
 def homepage():
@@ -65,72 +79,40 @@ def all_reservations():
 
     username = session.get("username")
     reservations = crud.get_reservations_by_user(username)
+    reservations_schema = ReservationSchema(many=True)
+    reservations_json = reservations_schema.dump(reservations)
 
-    return jsonify({"reservations": reservations})
+    return jsonify({"reservations": reservations_json})
 
 
 @app.route("/search_reservations", methods=["GET"])
 def search_reservations():
     """Search for reservations"""
 
-    date = request.args.get("keyword", "")
-    start_time = request.args.get("difficulty")
-    end_time = request.args.get("leash_rule")
+    date = request.args.get("date", "")
+    start_time = request.args.get("start_time", "")
+    end_time = request.args.get("end_time", "")
 
     reservations = crud.get_reservations_by_query(date, start_time, end_time)
+    reservations_schema = ReservationSchema(many=True)
+    reservations_json = reservations_schema.dump(reservations)
 
-    return jsonify({"reservations": reservations})
-
-
-@app.route("/hikes/<hike_id>")
-def show_hike(hike_id):
-    """Show details on a particular hike."""
-
-    hike = crud_hikes.get_hike_by_id(hike_id)
-
-    logged_in_email = session.get("user_email")
-
-    if logged_in_email is None:
-        return render_template("hike_details.html", hike=hike, GOOGLE_KEY=GOOGLE_KEY)
-    else:
-        user = crud_users.get_user_by_email(logged_in_email)
-        return render_template("hike_details.html", user=user, hike=hike, GOOGLE_KEY=GOOGLE_KEY)
-
-@app.route("/edit-user", methods=["POST"])
-def edit_user():
-    """Edit a user"""
-
-    logged_in_email = session.get("user_email")
-    user = crud_users.get_user_by_email(logged_in_email)
-
-    full_name = request.form.get("full_name")
-    email = request.form.get("email")
-    password = request.form.get("new-password")
-
-    if full_name != "":
-        user.full_name = full_name
-        flash("Name updated ✓")
-
-    if email != "":
-        user_exists = crud_users.get_user_by_email(email)
-        if user_exists:
-            flash(
-                "There is already an account associated with that email."
-            )
-        else:
-            user.email = email
-            session["user_email"] = user.email
-            flash("Email updated ✓")
+    return jsonify({"reservations": reservations_json})
 
 
-    if password != "":
-        user.password = password
-        flash("Password updated ✓")
+@app.route("/login_session.json")
+def login_session_json():
+    """Return a JSON response for a login."""
 
+    username = session.get("username")
 
-    db.session.commit()
+    login = "False"
 
-    return redirect(request.referrer)
+    if username:
+        login = "True"
+
+    return jsonify({"login": login, "username": username})
+
 
 
 @app.route("/add-pet", methods=["POST"])
@@ -645,24 +627,6 @@ def delete_comment(comment_id):
     db.session.commit()
 
     return jsonify({"success": True})
-
-
-
-@app.route("/login_session.json")
-def login_session_json():
-    """Return a JSON response for a login."""
-
-    logged_in_email = session.get("user_email")
-
-    if logged_in_email is None:
-        login = "False"
-        user_id = "None"
-    else:
-        user = crud_users.get_user_by_email(logged_in_email)
-        login = "True"
-        user_id = user.user_id
-
-    return jsonify({"login": login, "user_id": user_id})
 
 
 

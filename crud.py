@@ -42,8 +42,10 @@ def get_reservations_by_query(date, start_time, end_time):
     queries.append(Reservation.date == date)
 
     if start_time != "":
+        start_time += ":00"
         queries.append(Reservation.start_time >= start_time)
     if end_time != "":
+        end_time += ":00"
         queries.append(Reservation.end_time <= end_time)
 
     return db.session.query(Reservation).filter(*queries).order_by(Reservation.start_time.asc()).order_by(Reservation.date.asc()).all()

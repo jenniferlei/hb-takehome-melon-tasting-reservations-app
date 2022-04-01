@@ -3,9 +3,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-import datetime
-
 db = SQLAlchemy()
+
 
 class User(db.Model):
     """A user."""
@@ -48,6 +47,16 @@ def connect_to_db(flask_app, db_uri="postgresql:///scheduler", echo=True):
     db.init_app(flask_app)
 
     print("Connected to the db!")
+
+
+def example_data():
+    """Create example data for the test database."""
+    
+    test_user = User(username="testuser")
+    test_reservation = Reservation(user=test_user, date="2022-03-31", start_time="12:00", end_time="12:30")
+    
+    db.session.add_all([test_user, test_reservation])
+    db.session.commit()
 
 
 if __name__ == "__main__":
