@@ -4,8 +4,6 @@ A simple service to help users make reservations to go to a fancy melon tasting!
 
 We offer 24/7/365 (including weekends and holidays) but only 1 user can book an appointment on a given day and time.
 
-![Homepage](/static/img/readme/Pup_Journey_Homepage.png "Homepage")
-
 **CONTENTS**
 
 - [Tech Stack](#tech-stack)
@@ -17,7 +15,7 @@ We offer 24/7/365 (including weekends and holidays) but only 1 user can book an 
 
 **Backend:** Python3, Flask, Flask-Marshmallow, Jinja, SQLAlchemy\
 **Frontend:** React, React Hooks, JavaScript, HTML5, CSS3, Bootstrap\
-**Database:** PostgreSQL\
+**Database:** PostgreSQL
 
 ## Features
 
