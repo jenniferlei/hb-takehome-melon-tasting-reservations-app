@@ -151,7 +151,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
             <th role="columnheader">Date</th>
             <th role="columnheader">Start Time</th>
             <th role="columnheader">End Time</th>
-            <th role="columnheader">Del</th>
+            <th role="columnheader">Delete</th>
           </tr>
         </thead>
         <tbody>{allReservations}</tbody>
@@ -252,8 +252,11 @@ const OpenReservation = (props) => {
               ></button>
             </div>
             <div className="modal-body fw-300">
-              Would you like to create a reservation for {dateFormatted} from{" "}
-              {startTimeFormatted} to {endTimeFormatted}?
+              <div className="mb-3" style={{ textAlign: "center" }}>
+                Would you like to create a reservation for
+                <br /> {dateFormatted} from {startTimeFormatted} to{" "}
+                {endTimeFormatted}?
+              </div>
               <div className="modal-footer">
                 <button
                   className="btn btn-sm btn-outline-dark btn-block fw-300"
@@ -315,7 +318,7 @@ const SearchReservation = (props) => {
     });
     if (availReservations.length === 0) {
       setErrorMessage(
-        "There are no available reservations for this timeframe. Please try again."
+        "There are no available reservations for this time frame. Please try again."
       );
     } else {
       setErrorMessage(null);
@@ -362,7 +365,8 @@ const SearchReservation = (props) => {
               const filteredAppointmentTimes = appointmentTimes.filter(
                 (timeSlot) =>
                   timeSlot[0].concat(":00") >= reservationStart &&
-                  timeSlot[1].concat(":00") <= reservationEnd
+                  timeSlot[1].concat(":00") <=
+                    reservationEnd.slice(0, 5).concat(":01")
               );
               compareWithExistingReservations(
                 filteredAppointmentTimes,
