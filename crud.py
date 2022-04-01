@@ -28,6 +28,12 @@ def create_reservation(user, date, start_time, end_time):
     return reservation
 
 
+def get_reservations_by_id(reservation_id):
+    """Return reservations by reservation id."""
+
+    return db.session.query(Reservation).get(reservation_id)
+
+
 def get_reservations_by_user(username):
     """Return reservations by username."""
 
@@ -43,10 +49,10 @@ def get_reservations_by_query(date, start_time, end_time):
 
     if start_time != "":
         start_time_formatted = f'{start_time}:00'
-        queries.append(Reservation.start_time <= start_time_formatted)
+        queries.append(Reservation.start_time >= start_time_formatted)
     if end_time != "":
         end_time_formatted = f'{end_time}:00'
-        queries.append(Reservation.start_time >= end_time_formatted)
+        queries.append(Reservation.end_time <= end_time_formatted)
 
     return db.session.query(Reservation).filter(*queries).order_by(Reservation.start_time.asc()).all()
 

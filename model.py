@@ -2,6 +2,7 @@
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 
 db = SQLAlchemy()
 
@@ -23,6 +24,7 @@ class Reservation(db.Model):
     """A reservation."""
 
     __tablename__ = "reservations"
+    __table_args__ = (db.UniqueConstraint('username', 'date'),)
 
     reservation_id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
     username = db.Column(db.String, db.ForeignKey("users.username"), nullable=False)

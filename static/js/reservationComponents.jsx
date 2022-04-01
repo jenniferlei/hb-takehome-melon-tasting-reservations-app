@@ -48,7 +48,7 @@ const appointmentTimes = [
   ["22:00", "22:30", 45],
   ["22:30", "23:00", 46],
   ["23:00", "23:30", 47],
-  ["23:30", "00:00", 48],
+  ["23:30", "24:00", 48],
 ];
 
 const ViewReservation = (props) => {
@@ -66,11 +66,35 @@ const ViewReservation = (props) => {
   const dateFormatted =
     date.slice(5, 7) + "/" + date.slice(8, 10) + "/" + date.slice(2, 4);
 
+  const deleteReservation = () => {
+    const validate = confirm("Do you want to delete this reservation?");
+    if (validate) {
+      fetch(`/delete-reservation/${reservationId}`, {
+        method: "DELETE",
+      }).then((response) => {
+        response.json().then((jsonResponse) => {
+          // console.log(jsonResponse);
+          props.getReservations();
+        });
+      });
+    }
+  };
+
   return (
     <tr id={reservationId}>
       <td>{dateFormatted}</td>
       <td>{convertTimeFormat(startTime)}</td>
       <td>{convertTimeFormat(endTime)}</td>
+      <td>
+        <button
+          type="button"
+          className="btn btn-outline-dark"
+          style={{ borderRadius: "50%", padding: "0 7.5px" }}
+          onClick={deleteReservation}
+        >
+          -
+        </button>
+      </td>
     </tr>
   );
 };
@@ -79,13 +103,17 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
   const [reservations, setReservations] = React.useState([]);
 
   React.useEffect(() => {
+    getReservations();
+  }, []);
+
+  const getReservations = () => {
     fetch("/reservations")
       .then((response) => response.json())
       .then((responseJson) => {
         const { reservations } = responseJson;
         setReservations(reservations);
       });
-  }, []);
+  };
 
   React.useImperativeHandle(ref, () => ({
     getReservations() {
@@ -107,6 +135,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
       date={reservation.date}
       startTime={reservation.start_time}
       endTime={reservation.end_time}
+      getReservations={getReservations}
     />
   ));
 
@@ -119,6 +148,7 @@ const ViewReservationContainer = React.forwardRef((props, ref) => {
             <th role="columnheader">Date</th>
             <th role="columnheader">Start Time</th>
             <th role="columnheader">End Time</th>
+            <th role="columnheader">Del</th>
           </tr>
         </thead>
         <tbody>{allReservations}</tbody>
@@ -254,6 +284,31 @@ const SearchReservation = (props) => {
       });
   }, []);
 
+  const compareWithExistingReservations = (apptTimes, reservations) => {
+    let availReservations = [];
+    apptTimes.map((timeSlot) => {
+      if (
+        !reservations.some(
+          (reservation) => reservation.start_time === timeSlot[0].concat(":00")
+        )
+      ) {
+        availReservations.push({
+          startTime: timeSlot[0],
+          endTime: timeSlot[1],
+          order: timeSlot[2],
+        });
+      }
+    });
+    if (availReservations.length === 0) {
+      setErrorMessage(
+        "There are no available reservations for this timeframe. Please try again."
+      );
+    } else {
+      setErrorMessage(null);
+    }
+    setOpenReservations(availReservations);
+  };
+
   // fetch reservations based on the date, start time and end time parameters
   // if user already has a reservation on date, show error
   // if none available, show error
@@ -289,37 +344,51 @@ const SearchReservation = (props) => {
             console.log("TEST", reservations);
             return;
           } else {
-            // If start time is not already reserved, add to available reservation times
-            let availReservations = [];
-            appointmentTimes.map((timeSlot) => {
-              if (
-                !reservations.some(
-                  (reservation) =>
-                    reservation.start_time === timeSlot[0].concat(":00")
-                )
-              ) {
-                availReservations.push({
-                  startTime: timeSlot[0],
-                  endTime: timeSlot[1],
-                  order: timeSlot[2],
-                });
-              }
-            });
-            if (availReservations.length === 0) {
-              setErrorMessage(
-                "There are no available reservations for this timeframe. Please try again."
+            if (reservationStart && reservationEnd) {
+              const filteredAppointmentTimes = appointmentTimes.filter(
+                (timeSlot) =>
+                  timeSlot[0].concat(":00") >= reservationStart &&
+                  timeSlot[1].concat(":00") <= reservationEnd
+              );
+              compareWithExistingReservations(
+                filteredAppointmentTimes,
+                reservations
+              );
+            } else if (reservationStart) {
+              const filteredAppointmentTimes = appointmentTimes.filter(
+                (timeSlot) => timeSlot[0].concat(":00") >= reservationStart
+              );
+              compareWithExistingReservations(
+                filteredAppointmentTimes,
+                reservations
+              );
+            } else if (reservationEnd) {
+              const filteredAppointmentTimes = appointmentTimes.filter(
+                (timeSlot) => timeSlot[1].concat(":00") <= reservationEnd
+              );
+              compareWithExistingReservations(
+                filteredAppointmentTimes,
+                reservations
               );
             } else {
-              setErrorMessage(null);
+              compareWithExistingReservations(appointmentTimes, reservations);
             }
-            setOpenReservations(availReservations);
+            // If start time is not already reserved, add to available reservation times
           }
         });
     }
   };
 
+  const clearSearch = () => {
+    setReservationDate("");
+    setReservationStart("");
+    setReservationEnd("");
+    setOpenReservations([]);
+  };
+
   const parentGetReservations = () => {
     props.topParentGetReservations(); // lift state up to ReservationContainer
+    // clearSearch();
   };
 
   const timestamp = Date.now();
@@ -379,42 +448,52 @@ const SearchReservation = (props) => {
             />
           </div>
         </div>
-        <button
-          type="submit"
-          className="btn btn-outline-dark"
-          onClick={getOpenReservations}
-        >
-          Search
-        </button>
+        <div className="d-flex">
+          <button
+            type="submit"
+            className="btn btn-outline-dark me-2"
+            onClick={getOpenReservations}
+          >
+            Search
+          </button>
+          <button
+            type="submit"
+            className="btn btn-outline-dark"
+            onClick={clearSearch}
+          >
+            Clear Search
+          </button>
+        </div>
       </div>
       <div
-        className="flex-container"
         style={{
-          height: "calc(100% - 290px)",
-          maxHeight: "calc(100% - 290px)",
-          minHeight: "0",
-          overflowY: "auto",
-          display: "table",
+          height: "calc(80vh - 310px)",
         }}
       >
-        test
-        {errorMessage ? (
-          <div>{errorMessage}</div>
-        ) : openReservations.length > 0 ? (
-          <div>
-            <table className="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th role="columnheader">Date</th>
-                  <th role="columnheader">Start Time</th>
-                  <th role="columnheader">End Time</th>
-                  <th role="columnheader">Add</th>
-                </tr>
-              </thead>
-              <tbody>{allOpenReservations}</tbody>
-            </table>
-          </div>
-        ) : null}
+        <div
+          style={{
+            height: "100%",
+            overflowY: "auto",
+          }}
+        >
+          {errorMessage ? (
+            <div>{errorMessage}</div>
+          ) : openReservations.length > 0 ? (
+            <div>
+              <table className="table table-striped table-sm">
+                <thead>
+                  <tr>
+                    <th role="columnheader">Date</th>
+                    <th role="columnheader">Start Time</th>
+                    <th role="columnheader">End Time</th>
+                    <th role="columnheader">Add</th>
+                  </tr>
+                </thead>
+                <tbody>{allOpenReservations}</tbody>
+              </table>
+            </div>
+          ) : null}
+        </div>
       </div>
     </React.Fragment>
   );
