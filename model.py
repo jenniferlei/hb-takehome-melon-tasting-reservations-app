@@ -41,7 +41,10 @@ class Reservation(db.Model):
         return f"<Reservation reservation_id={self.reservation_id} username={self.username} date={self.date} start_time={self.start_time} end_time={self.end_time}>"
 
 
-uri = os.environ.get("DATABASE_URL")  # or other relevant config var
+uri = os.getenv("DATABASE_URL")  # or other relevant config var
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+# rest of connection code using the connection string `uri`
 
 # other_uri = "postgresql:///scheduler"
 
