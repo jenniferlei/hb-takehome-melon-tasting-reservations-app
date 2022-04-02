@@ -6,15 +6,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
-from server import app
-
-uri = os.getenv("DATABASE_URL")  # or other relevant config var
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
-# rest of connection code using the connection string `uri`
 
 db = SQLAlchemy()
-db.init_app(app)
 
 class User(db.Model):
     """A user."""
@@ -46,6 +39,14 @@ class Reservation(db.Model):
 
     def __repr__(self):
         return f"<Reservation reservation_id={self.reservation_id} username={self.username} date={self.date} start_time={self.start_time} end_time={self.end_time}>"
+
+
+uri = os.eviron.get("DATABASE_URL")  # or other relevant config var
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+# rest of connection code using the connection string `uri`
+
+other_uri = "postgresql:///scheduler"
 
 
 def connect_to_db(flask_app, db_uri=uri, echo=True):
