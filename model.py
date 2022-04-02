@@ -6,13 +6,15 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
+from server import app
+
 uri = os.getenv("DATABASE_URL")  # or other relevant config var
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 # rest of connection code using the connection string `uri`
 
 db = SQLAlchemy()
-
+db.init_app(app)
 
 class User(db.Model):
     """A user."""
