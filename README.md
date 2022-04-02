@@ -4,6 +4,8 @@ A simple service to help users make reservations to go to a fancy melon tasting!
 
 We offer 24/7/365 (including weekends and holidays) but only 1 user can book an appointment on a given day and time.
 
+Melon Tasting Reservation Scheduler is deployed on Heroku: <a href="https://hb-takehome-melon-tasting-app.herokuapp.com/" target="_blank">https://hb-takehome-melon-tasting-app.herokuapp.com/</a>
+
 <img width="75%" height="75%" alt="Homepage" src="https://user-images.githubusercontent.com/43583599/161311049-ba6b92be-bf91-473e-a77c-cde7daf0039d.png">
 
 **CONTENTS**
@@ -54,7 +56,7 @@ If the user searches for reservations on a date which they already have an exist
 Logged in users can select an available reservation from the search results and make a reservation.
 <br/>When the user confirms, a post request is sent to the Python-Flask backend and adds a new reservation into the postgreSQL database.
 <br/>Once a new reservation is created in the current component, the React frontend fetches the user's reservations in its sibling (view reservations container) component.
-<br/>This is done by lifting state up to the parent (reservation container) and then using useRef in the parent to access the child component where the reservations are.
+<br/>This is done by lifting state up to the parent (reservation container) and then using useRef in the parent to access the child component useImperativeHandle where the reservations are.
 <br/>This enables the user to see their reservations with the added reservation without refreshing.
 <br/>If the user tries to add another reservation from the same date, the user will be alerted and the reservation will not be created.
 <br/>The postgres database also has a unique constraint to prevent multiple reservations on the same date with the same user from being created.
