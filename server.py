@@ -50,7 +50,12 @@ def process_login():
 
     user = crud.get_user_by_username(username)
     if not user:
-        flash("User does not exist.")
+        user = crud.create_user(username)
+        db.session.add(user)
+        db.session.commit()
+        session["username"] = user.username
+        session["login"] = True
+        flash(f"Welcome, {user.username}!")
     else:
         # Log in user by storing the user's email in session
         session["username"] = user.username
